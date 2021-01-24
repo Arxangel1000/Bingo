@@ -14,9 +14,9 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] Transform m_GroundCheck; // ссылка на компонент Transform объекта для определения соприкосновения с землей.
     [SerializeField] private float m_GroundRadius = 0.3f; // радиус определения соприкосновения с землей.
     [SerializeField] LayerMask m_WhatIsGround; // ссылка на слой, представляющий землю.
-    [SerializeField] Button walk;
     bool walkActivate;
-  //  [SerializeField] Button jump;
+    [SerializeField] Button jump;
+    int direction = 1;
     private void Awake()
     {
         
@@ -38,13 +38,16 @@ public class PlayerController : MonoBehaviour {
             PlayerMove(); 
             m_CharacterAnimator.SetInteger("Pose", 1);
         }
-       else if (Input.GetButton("Horizontal") && Input.GetKey(KeyCode.Space))
+        else if (Input.GetButton("Horizontal") && Input.GetKey(KeyCode.Space))
         {
            
             m_PlayerRigidbody.AddForce(new Vector2(0, 600));
             m_CharacterAnimator.SetInteger("Pose", 2);
         }
-        else { m_CharacterAnimator.SetInteger("Pose", 0); }
+        else 
+        {
+            m_CharacterAnimator.SetInteger("Pose", 0); 
+        }
 
         // если персонаж на земле и нажат пробел
         if (m_IsGround && Input.GetKeyDown(KeyCode.Space))
@@ -56,11 +59,23 @@ public class PlayerController : MonoBehaviour {
         }
   
     }
-    public void WalkMethod()
+    public void WalkFrontMethod()
     {
         walkActivate = true;
+        direction = 1;
     }
-     void FixedUpdate()
+
+    public void WalkBackMethod()
+    {
+        walkActivate = true;
+        direction = -1;
+    }
+
+    public void StopMethod()
+    {
+        walkActivate = false;
+    }
+    void FixedUpdate()
     {
         // определяем на землели персонаж
         m_IsGround = Physics2D.OverlapCircle(m_GroundCheck.position,
@@ -74,10 +89,9 @@ public class PlayerController : MonoBehaviour {
     }
 
 
-
     void PlayerMove()
     {
-        Vector3 tempvector = Vector3.right * Input.GetAxis("Horizontal");
+        Vector3 tempvector = Vector3.right*direction;
         transform.position = Vector3.MoveTowards(transform.position, transform.position + tempvector, m_SensetivityHor * Time.deltaTime);
         if (tempvector.x < 0)
         {
@@ -89,11 +103,9 @@ public class PlayerController : MonoBehaviour {
         }
     } 
   
-    void Jump()
-    {
-       
-        m_PlayerRigidbody.AddForce(transform.up * m_SensetivityVert, ForceMode2D.Impulse);
-       
+    public void Jump()
+    {  
+        m_PlayerRigidbody.AddForce(transform.up * m_SensetivityVert, ForceMode2D.Impulse);  
     }
 
     void CheckGround()
